@@ -9,10 +9,9 @@ import json  # Import the json module to work with JSON files
 # import matplotlib.pyplot as plt
 # from nltk.corpus import stopwords
 
-cluster_id = None #Initially set to None, used to store the current cluster ID being processed.
-current_cluster_index = 0 #nitialized to 0, keeps track of the index of the current cluster being displayed or processed.
-clusters_data = None #Initially set to None, will hold the loaded JSON data containing cluster information.
-
+cluster_id = None # Initially set to None, used to store the current cluster ID being processed.
+current_cluster_index = 0 # Initialized to 0, keeps track of the index of the current cluster being displayed or processed.
+clusters_data = None # Initially set to None, will hold the loaded JSON data containing cluster information.
 
 """
 updated
@@ -51,29 +50,25 @@ def update_json_with_user_input(cluster_id, meaningful, lex_input, syn_input, se
         print("An error occurred while writing to the JSON file:", e)
 
 
-
-def load_next_cluster_data():
+def load_next_cluster_data(forward=True):
     global current_cluster_index, clusters_data
     cluster_ids = list(clusters_data.keys())
 
-    while current_cluster_index < len(cluster_ids):
+    if forward:
+        current_cluster_index += 1
+    else:
+        current_cluster_index -= 1
+
+    if 0 <= current_cluster_index < len(cluster_ids):
         current_cluster = cluster_ids[current_cluster_index]
         print("Current index: ", current_cluster_index)
-        # Check if the current cluster data has a 'UserInput' key
-        if "Q4_Answer" not in clusters_data[current_cluster][-1]:
-            load_cluster_data(current_cluster)
-            break
-        else:
-            current_cluster_index += 1  # Move to the next cluster if 'UserInput' exists
-    
-    if current_cluster_index >= len(cluster_ids):
-        print("No more clusters to display or all remaining clusters have user input.")
-
+        load_cluster_data(current_cluster)
+    else:
+        print("No more clusters to display.")
 
 def load_cluster_data(cluster_id):
     global current_cluster_index, clusters_data
-    print("Current cluster: ", cluster_id) 
-
+    print("Current cluster: ", cluster_id)
 
     with (open(labels_file_path, "r")) as labelsFile:
         label_lines = [line.strip().split() for line in labelsFile]
@@ -89,7 +84,6 @@ def load_cluster_data(cluster_id):
     allTokens = cluster_data[:-1]
     UserInput = cluster_data[-1]
 
-
     for entry in allTokens:
         token = entry["Word"]
         sentence_id = int(entry["SentID"])
@@ -99,7 +93,6 @@ def load_cluster_data(cluster_id):
             token_label = label_lines[sentence_id][token_id]
         except IndexError:
             token_label = "N/A"
-
 
         treeview.insert("", tk.END, values=(token, token_label, sentence))
 
@@ -146,15 +139,14 @@ def on_enter_click():
     q4_entry.delete(0, tk.END)
 
     # Move to the next cluster
-    current_cluster_index += 1
-    load_next_cluster_data()
+    load_next_cluster_data(forward=True)
 
+def on_previous_click():
+    # Move to the previous cluster
+    load_next_cluster_data(forward=False)
 
 root = tk.Tk()
 root.title("Labelling Tool")
-
-
-
 
 # Frame for the new textboxes
 questions_frame = tk.Frame(root)
@@ -182,9 +174,8 @@ sem_input.pack(side=tk.LEFT, expand=False, fill=tk.X, padx=(0, 10), pady=10)
 meaningful_frame = tk.Frame(root)
 meaningful_frame.pack(fill=tk.X, before=questions_frame)  # Ensure this frame is packed before the questions_frame
 
-
 # Enter button next to the input
-enter_button = tk.Button(questions_frame, text="Enter")
+enter_button = tk.Button(questions_frame, text="Enter", command=on_enter_click)
 enter_button.pack(side=tk.LEFT, padx=(10, 0), pady=10)
 
 # Label for the question
@@ -252,7 +243,6 @@ q4_label.pack(side=tk.TOP, padx=10, pady=(10, 2))
 q4_entry = tk.Entry(research_frame)
 q4_entry.pack(fill=tk.X, padx=10, pady=(0, 10))
 
-
 # Frame for displaying labels, placed below the user input and above the Treeview
 labels_frame = tk.Frame(root, height=100)  # Adjust height as needed
 labels_frame.pack(fill=tk.X, pady=10)
@@ -289,9 +279,15 @@ customFont = tkFont.Font(family="Helvetica", size=12)  # Adjust the size as need
 style = ttk.Style()
 style.configure("Treeview", font=customFont, rowheight=customFont.metrics("linespace"))
 
+# Adding Previous and Next buttons for navigation
+navigation_frame = tk.Frame(root)
+navigation_frame.pack(fill=tk.X, pady=10)
 
-enter_button.config(command=on_enter_click)
+previous_button = tk.Button(navigation_frame, text="Previous", command=on_previous_click)
+previous_button.pack(side=tk.LEFT, padx=(10, 0), pady=10)
 
+next_button = tk.Button(navigation_frame, text="Next", command=lambda: load_next_cluster_data(forward=True))
+next_button.pack(side=tk.RIGHT, padx=(0, 10), pady=10)
 
 json_file_path = "251-300.json"
 labels_file_path = "codetest2_test_unique.label"
@@ -299,11 +295,6 @@ labels_file_path = "codetest2_test_unique.label"
 with open(json_file_path, "r") as jsonFile:
     clusters_data = json.load(jsonFile)
 
-load_next_cluster_data();
-# cluster_ids = list(clusters_data.keys())
-# print(cluster_ids)
-# print("Index value: ", cluster_ids.index('221'))
-# load_cluster_data(cluster_ids[25])
-
+load_next_cluster_data(forward=True)
 
 root.mainloop()
