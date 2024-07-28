@@ -53,19 +53,23 @@ def update_json_with_user_input(cluster_id, meaningful, lex_input, syn_input, se
 def load_next_cluster_data(forward=True):
     global current_cluster_index, clusters_data
     cluster_ids = list(clusters_data.keys())
-
+    
     if forward:
         current_cluster_index += 1
     else:
         current_cluster_index -= 1
 
-    if 0 <= current_cluster_index < len(cluster_ids):
+    if current_cluster_index < 0:
+        current_cluster_index = 0
+        print("Already at the first cluster.")
+    elif current_cluster_index >= len(cluster_ids):
+        current_cluster_index = len(cluster_ids) - 1
+        print("Already at the last cluster.")
+    else:
         current_cluster = cluster_ids[current_cluster_index]
         print("Current index: ", current_cluster_index)
         load_cluster_data(current_cluster)
-    else:
-        print("No more clusters to display.")
-
+        
 def load_cluster_data(cluster_id):
     global current_cluster_index, clusters_data
     print("Current cluster: ", cluster_id)
@@ -298,3 +302,4 @@ with open(json_file_path, "r") as jsonFile:
 load_next_cluster_data(forward=True)
 
 root.mainloop()
+
