@@ -302,4 +302,3 @@ with open(json_file_path, "r") as jsonFile:
 load_next_cluster_data(forward=True)
 
 root.mainloop()
-
