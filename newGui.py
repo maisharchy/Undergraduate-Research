@@ -3,15 +3,12 @@ from tkinter import ttk
 import tkinter.font as tkFont
 import json  # Import the json module to work with JSON files
 
-# import numpy as np
-# from PIL import Image
-# from wordcloud import WordCloud
-# import matplotlib.pyplot as plt
-# from nltk.corpus import stopwords
+cluster_id = None  # Initially set to None, used to store the current cluster ID being processed.
+current_cluster_index = 0  # Initialized to 0, keeps track of the index of the current cluster being displayed or processed.
+clusters_data = None  # Initially set to None, will hold the loaded JSON data containing cluster information.
 
-cluster_id = None # Initially set to None, used to store the current cluster ID being processed.
-current_cluster_index = 0 # Initialized to 0, keeps track of the index of the current cluster being displayed or processed.
-clusters_data = None # Initially set to None, will hold the loaded JSON data containing cluster information.
+json_file_path = "251-300.json"
+labels_file_path = "codetest2_test_unique.label"
 
 """
 updated
@@ -24,22 +21,14 @@ def update_json_with_user_input(cluster_id, meaningful, lex_input, syn_input, se
         if cluster_id in data:
             print("Updating JSON with input: ", meaningful, lex_input, syn_input, sem_input, user_desc)
             data[cluster_id][-1]["Meaningful"] = meaningful
-            if lex_input:
-                data[cluster_id][-1]["Lexicographic"] = lex_input
-            if syn_input:
-                data[cluster_id][-1]["Syntactic"] = syn_input
-            if sem_input:
-                data[cluster_id][-1]["Semantic"] = sem_input
-            if user_desc:
-                data[cluster_id][-1]["Description"] = user_desc
-            if q1_answer:
-                data[cluster_id][-1]["Q1_Answer"] = q1_answer
-            if q2_answer:
-                data[cluster_id][-1]["Q2_Answer"] = q2_answer
-            if q3_answer:
-                data[cluster_id][-1]["Q3_Answer"] = q3_answer
-            if q4_answer:
-                data[cluster_id][-1]["Q4_Answer"] = q4_answer
+            data[cluster_id][-1]["Lexicographic"] = lex_input
+            data[cluster_id][-1]["Syntactic"] = syn_input
+            data[cluster_id][-1]["Semantic"] = sem_input
+            data[cluster_id][-1]["Description"] = user_desc
+            data[cluster_id][-1]["Q1_Answer"] = q1_answer
+            data[cluster_id][-1]["Q2_Answer"] = q2_answer
+            data[cluster_id][-1]["Q3_Answer"] = q3_answer
+            data[cluster_id][-1]["Q4_Answer"] = q4_answer
 
         else:
             print(f"Error writing to JSON: Cluster ID {cluster_id} not found")
@@ -81,6 +70,17 @@ def load_cluster_data(cluster_id):
     treeview.delete(*treeview.get_children())
     labels_text.configure(state="normal")
     labels_text.delete("1.0", tk.END)
+    
+    # Clear the input fields
+    lex_input.delete(0, tk.END)
+    syn_input.delete(0, tk.END)
+    sem_input.delete(0, tk.END)
+    user_description_input.delete(0, tk.END)
+    q1_entry.set("Unanswered")
+    q2_entry.set("Unanswered")
+    q3_entry.set("Unanswered")
+    q4_entry.delete(0, tk.END)
+    meaningful_answer.set("I don't know")
 
     cluster_data = clusters_data[cluster_id]
 
@@ -293,12 +293,11 @@ previous_button.pack(side=tk.LEFT, padx=(10, 0), pady=10)
 next_button = tk.Button(navigation_frame, text="Next", command=lambda: load_next_cluster_data(forward=True))
 next_button.pack(side=tk.RIGHT, padx=(0, 10), pady=10)
 
-json_file_path = "251-300.json"
-labels_file_path = "codetest2_test_unique.label"
-
 with open(json_file_path, "r") as jsonFile:
     clusters_data = json.load(jsonFile)
 
 load_next_cluster_data(forward=True)
 
 root.mainloop()
+
+
