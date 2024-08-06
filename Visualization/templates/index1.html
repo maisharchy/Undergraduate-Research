@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hierarchical Clustering Visualization</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <style>
+        #wordcloud img {
+            max-width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1>Hierarchical Clustering Visualization</h1>
+    <input type="number" id="cluster-id" placeholder="Enter cluster ID" value=" 94640">
+    <button onclick="showClusterDetails()">Show Cluster Details</button>
+    <div id="dendrogram"></div>
+    <div id="cluster-details"></div>
+    <div id="wordcloud"></div>
+    <div id="all-clusters"></div>
+
+    <script>
+        function showClusterDetails(clusterId) {
+            if (!clusterId) {
+                clusterId = document.getElementById('cluster-id').value;
+            }
+            fetch(`/get_siblings/${clusterId}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log(`Cluster ${clusterId} data:`, data);
+                    if (data.length === 0) {
+                        document.getElementById('cluster-details').innerText = 'Invalid cluster ID or no details available.';
+                    } else {
+                        const children = data.map(child => `${child.name}`);
+                        document.getElementById('cluster-details').innerText = `Cluster ${clusterId} consists of: ${children.join(' and ')}`;
+                        const newData = {
+                            "name": `Cluster ${clusterId}`,
+                            "children": data
+                        };
+                        createDendrogram(newData);
+                        showWordCloud(clusterId);
+                    }
+                });
+        }
+
+        function createDendrogram(data) {
+            d3.select("#dendrogram").selectAll("*").remove();
+
+            const width = 800;
+            const height = 500;
+
+            const svg = d3.select("#dendrogram").append("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .append("g")
+                .attr("transform", "translate(40,0)");
+
+            const cluster = d3.cluster()
+                .size([height, width - 160]);
+
+            const root = d3.hierarchy(data);
+
+            cluster(root);
+
+            const link = svg.selectAll(".link")
+                .data(root.descendants().slice(1))
+                .enter().append("path")
+                .attr("class", "link")
+                .attr("d", d => {
+                    return "M" + d.y + "," + d.x
+                        + "C" + (d.parent.y + 50) + "," + d.x
+                        + " " + (d.parent.y + 50) + "," + d.parent.x
+                        + " " + d.parent.y + "," + d.parent.x;
+                });
+
+            const node = svg.selectAll(".node")
+                .data(root.descendants())
+                .enter().append("g")
+                .attr("class", d => "node" + (d.children ? " node--internal" : " node--leaf"))
+                .attr("transform", d => "translate(" + d.y + "," + d.x + ")");
+
+            node.append("circle")
+                .attr("r", 2.5)
+                .on("click", (event, d) => {
+                    const clusterId = d.data.name.split(" ")[1];
+                    showClusterDetails(clusterId);
+                });
+
+            node.append("text")
+                .attr("dy", 3)
+                .attr("x", d => d.children ? -8 : 8)
+                .style("text-anchor", d => d.children ? "end" : "start")
+                .text(d => d.data.name);
+        }
+
+        function showWordCloud(clusterId) {
+            const img = document.createElement('img');
+            img.src = `/get_wordcloud/${clusterId}`;
+            img.alt = `Word Cloud for Cluster ${clusterId}`;
+            document.getElementById('wordcloud').innerHTML = '';
+            document.getElementById('wordcloud').appendChild(img);
+        }
+
+        function displayAllClusters() {
+            fetch('/get_all_clusters')
+                .then(response => response.json())
+                .then(data => {
+                    const allClusters = data.clusters;
+                    const clusterList = allClusters.map(clusterId => `<li>Cluster ${clusterId}</li>`).join('');
+                    document.getElementById('all-clusters').innerHTML = `<ul>${clusterList}</ul>`;
+                });
+        }
+
+        fetch('/get_siblings/10')
+            .then(response => response.json())
+            .then(data => {
+                console.log("Initial data:", data);
+                const initialData = {
+                    "name": "Cluster 10",
+                    "children": data
+                };
+                createDendrogram(initialData);
+                showWordCloud(10);
+            });
+
+        displayAllClusters();
+    </script>
+</body>
+</html>
