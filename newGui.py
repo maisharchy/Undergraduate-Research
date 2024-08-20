@@ -7,19 +7,19 @@ cluster_id = None  # Initially set to None, used to store the current cluster ID
 current_cluster_index = 0  # Initialized to 0, keeps track of the index of the current cluster being displayed or processed.
 clusters_data = None  # Initially set to None, will hold the loaded JSON data containing cluster information.
 
-json_file_path = "251-300.json"
+json_file_path = "451-500.json"
 labels_file_path = "codetest2_test_unique.label"
 
 """
 updated
 """
-def update_json_with_user_input(cluster_id, meaningful, lex_input, syn_input, sem_input, user_desc, q1_answer, q2_answer, q3_answer, q4_answer):
+def update_json_with_user_input(cluster_id, meaningful, lex_input, syn_input, sem_input, user_desc, q1_answer, q2_answer, q3_answer, q4_answer, q5_answer, q6_answer):
     try:
         with open(json_file_path, 'r') as file:
             data = json.load(file)
 
         if cluster_id in data:
-            print("Updating JSON with input: ", meaningful, lex_input, syn_input, sem_input, user_desc)
+            print("Updating JSON with input: ", meaningful, lex_input, syn_input, sem_input, user_desc, q6_answer)
             data[cluster_id][-1]["Meaningful"] = meaningful
             data[cluster_id][-1]["Lexicographic"] = lex_input
             data[cluster_id][-1]["Syntactic"] = syn_input
@@ -29,6 +29,8 @@ def update_json_with_user_input(cluster_id, meaningful, lex_input, syn_input, se
             data[cluster_id][-1]["Q2_Answer"] = q2_answer
             data[cluster_id][-1]["Q3_Answer"] = q3_answer
             data[cluster_id][-1]["Q4_Answer"] = q4_answer
+            data[cluster_id][-1]["Q5_Answer"] = q5_answer
+            data[cluster_id][-1]["Q6_Answer"] = q6_answer  # Store the answer for Q6
 
         else:
             print(f"Error writing to JSON: Cluster ID {cluster_id} not found")
@@ -63,7 +65,7 @@ def load_cluster_data(cluster_id):
     global current_cluster_index, clusters_data
     print("Current cluster: ", cluster_id)
 
-    with (open(labels_file_path, "r")) as labelsFile:
+    with open(labels_file_path, "r") as labelsFile:
         label_lines = [line.strip().split() for line in labelsFile]
 
     # Clear the Treeview and Labels Text widget
@@ -112,7 +114,24 @@ def load_cluster_data(cluster_id):
         sem_input.insert(0, UserInput["Semantic"])
     if "Meaningful" in UserInput:
         meaningful_answer.set(UserInput["Meaningful"])
-
+    if "Description" in UserInput:  # Load user description
+        user_description_input.insert(0, UserInput["Description"])
+    
+    # Display and print answers to research questions if present
+    if "Q1_Answer" in UserInput:
+        q1_entry.set(UserInput["Q1_Answer"])
+    if "Q2_Answer" in UserInput:
+        q2_entry.set(UserInput["Q2_Answer"])
+    if "Q3_Answer" in UserInput:
+        q3_entry.set(UserInput["Q3_Answer"])
+    if "Q4_Answer" in UserInput:
+        q4_entry.insert(0, UserInput["Q4_Answer"])
+    if "Q5_Answer" in UserInput:
+        q5_answer.set(UserInput["Q5_Answer"])
+    if "Q6_Answer" in UserInput:
+        q6_answer.set(UserInput["Q6_Answer"])
+    
+    
 """
 updated
 """
@@ -128,9 +147,12 @@ def on_enter_click():
     q2_answer_value = q2_answer.get()
     q3_answer_value = q3_answer.get()
     q4_answer_value = q4_entry.get()
+    q5_answer_value = q5_answer.get()
+    q6_answer_value = q6_answer.get()  # Get the answer for Q6
 
     update_json_with_user_input(current_cluster, meaningful, lex_text, syn_text, sem_text, user_desc,
-                                q1_answer_value, q2_answer_value, q3_answer_value, q4_answer_value)
+                                q1_answer_value, q2_answer_value, q3_answer_value, q4_answer_value, q5_answer_value,
+                                q6_answer_value)  # Include Q6
 
     # Clear all input fields
     lex_input.delete(0, tk.END)
@@ -141,9 +163,12 @@ def on_enter_click():
     q2_entry.set("Unanswered")
     q3_entry.set("Unanswered")
     q4_entry.delete(0, tk.END)
+    q5_entry.set("Unanswered")
+    q6_entry.set("None")  # Clear the Q6 entry
 
     # Move to the next cluster
     load_next_cluster_data(forward=True)
+
 
 def on_previous_click():
     # Move to the previous cluster
@@ -151,6 +176,12 @@ def on_previous_click():
 
 root = tk.Tk()
 root.title("Labelling Tool")
+
+
+
+
+
+
 
 # Frame for the new textboxes
 questions_frame = tk.Frame(root)
@@ -247,6 +278,24 @@ q4_label.pack(side=tk.TOP, padx=10, pady=(10, 2))
 q4_entry = tk.Entry(research_frame)
 q4_entry.pack(fill=tk.X, padx=10, pady=(0, 10))
 
+# Q5: Category (Lexicographic, Syntactic, Semantic, Descriptive)
+q5_label = tk.Label(research_frame, text="Q5: Which category does the LLM label fit in most closely?")
+q5_label.pack(side=tk.TOP, padx=10, pady=(10, 2))
+
+q5_answer = tk.StringVar(value="Unanswered")  # Default value
+q5_entry = ttk.Combobox(research_frame, textvariable=q5_answer, values=["Lexicographic", "Syntactic", "Semantic", "Descriptive"])
+q5_entry.pack(side=tk.TOP, padx=10, pady=(0, 10))
+
+# New Q6: Error Analysis for LLM Labeling
+q6_label = tk.Label(research_frame, text="Q6: Error analysis for LLM labeling (Sensitive Content Models, Linguistic Ontologies, etc.)")
+q6_label.pack(side=tk.TOP, padx=10, pady=(10, 2))
+
+q6_answer = tk.StringVar(value="None")  # Default value
+q6_entry = ttk.Combobox(research_frame, textvariable=q6_answer, values=["Sensitive Content Models", "Linguistic Ontologies", "Insufficient Context", "Uninterpretable Concepts", "None"])
+q6_entry.pack(side=tk.TOP, padx=10, pady=(0, 10))
+
+
+
 # Frame for displaying labels, placed below the user input and above the Treeview
 labels_frame = tk.Frame(root, height=100)  # Adjust height as needed
 labels_frame.pack(fill=tk.X, pady=10)
@@ -298,6 +347,11 @@ with open(json_file_path, "r") as jsonFile:
 
 load_next_cluster_data(forward=True)
 
+
+
 root.mainloop()
+
+
+
 
 
