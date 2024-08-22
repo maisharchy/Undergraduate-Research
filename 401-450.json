@@ -4537,12 +4537,12 @@
             "Lexicographic": ": , ,",
             "Description": "miscellaneous colons and commas",
             "Semantic": "",
-            "Q1_Answer": "Unacceptable",
-            "Q2_Answer": "Imprecise",
-            "Q3_Answer": "Inferior",
+            "Q1_Answer": "Acceptable",
+            "Q2_Answer": "Precise",
+            "Q3_Answer": "Superior",
             "Q4_Answer": "Miscelaneous Syntax, unsure",
-            "Q5_Answer": "Descriptive",
-            "Q6_Answer": "None"
+            "Q5_Answer": "Syntactic",
+            "Q6_Answer": "Uninterpretable Concepts"
         }
     ],
     "442": [
