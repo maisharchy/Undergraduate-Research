@@ -61,3 +61,110 @@ We can break down this code into tokens and apply BIO labels as shown in the tab
 ## Conclusion
 
 Applying BIO labels to code tokens provides a structured method for identifying and categorizing different code components. This method is particularly useful for tasks like code summarization, refactoring, and semantic analysis, where understanding the structure and meaning of code is crucial.
+
+
+# Labeling Lexical Patterns Using Regex
+
+Labeling lexical patterns using regex is an effective way to categorize identifiers, constants, and other lexical elements in code. Here's a guide on how you can create and apply regex patterns to label different lexical patterns in code, particularly in Java.
+
+## Common Lexical Patterns and Their Regex
+
+1. **CamelCase Identifiers**:
+   - **Pattern**: Identifiers that start with a lowercase letter and follow with uppercase letters for new words (e.g., `calculateSum`).
+   - **Regex**: `([a-z]+[A-Z][a-zA-Z0-9]*)`
+   - **Label**: `CamelCaseIdentifier`
+
+2. **snake\_case Identifiers**:
+   - **Pattern**: Identifiers with words separated by underscores (e.g., `calculate_sum`).
+   - **Regex**: `([a-z]+(_[a-z0-9]+)*)`
+   - **Label**: `snake_caseIdentifier`
+
+3. **SCREAMING\_SNAKE\_CASE Identifiers**:
+   - **Pattern**: Constants with words separated by underscores, typically all uppercase (e.g., `MAX_BUFFER_SIZE`).
+   - **Regex**: `([A-Z]+(_[A-Z0-9]+)*)`
+   - **Label**: `SCREAMING_SNAKE_CASE`
+
+4. **kebab-case Identifiers** (less common in Java but used in some contexts):
+   - **Pattern**: Identifiers with words separated by hyphens (e.g., `calculate-sum`).
+   - **Regex**: `([a-z]+(-[a-z0-9]+)*)`
+   - **Label**: `kebab-caseIdentifier`
+
+5. **Numeric Identifiers**:
+   - **Pattern**: Identifiers that end with a digit, often used for variables like `variable1`, `temp2`.
+   - **Regex**: `([a-zA-Z]+[0-9]+)`
+   - **Label**: `NumericIdentifier`
+
+6. **UpperCamelCase (PascalCase) Identifiers**:
+   - **Pattern**: Identifiers where each word starts with an uppercase letter (e.g., `CalculateSum`, typically used for class names).
+   - **Regex**: `([A-Z][a-z0-9]*)+`
+   - **Label**: `UpperCamelCaseIdentifier`
+
+7. **Prefixed Identifiers**:
+   - **Pattern**: Identifiers with specific prefixes like `get`, `set`, often seen in getter and setter methods (e.g., `getUserName`).
+   - **Regex**: `(get|set)[A-Z][a-zA-Z0-9]*`
+   - **Label**: `PrefixedIdentifier`
+
+## Applying Regex Patterns to Label Lexical Elements
+
+You can use Python's `re` module or similar tools in other programming languages to apply these regex patterns to code. Below is a Python example that demonstrates how to apply these patterns to label lexical elements in a code snippet:
+
+\`\`\`python
+import re
+
+# Sample code to analyze
+code = '''
+public class Calculator {
+    private int calculateSum(int a, int b) {
+        int total = a + b;
+        return total;
+    }
+}
+'''
+
+# Define regex patterns for different lexical patterns
+patterns = {
+    'CamelCaseIdentifier': r'([a-z]+[A-Z][a-zA-Z0-9]*)',
+    'snake_caseIdentifier': r'([a-z]+(_[a-z0-9]+)*)',
+    'SCREAMING_SNAKE_CASE': r'([A-Z]+(_[A-Z0-9]+)*)',
+    'NumericIdentifier': r'([a-zA-Z]+[0-9]+)',
+    'UpperCamelCaseIdentifier': r'([A-Z][a-z0-9]*)+',
+    'PrefixedIdentifier': r'(get|set)[A-Z][a-zA-Z0-9]*'
+}
+
+# Function to label code tokens
+def label_lexical_patterns(code, patterns):
+    labeled_tokens = []
+    for label, pattern in patterns.items():
+        matches = re.finditer(pattern, code)
+        for match in matches:
+            labeled_tokens.append((match.group(), label))
+    return labeled_tokens
+
+# Apply the patterns and print the labeled tokens
+labeled_tokens = label_lexical_patterns(code, patterns)
+for token, label in labeled_tokens:
+    print(f"Token: {token}, Label: {label}")
+\`\`\`
+
+## Output Example
+
+Running the code above would output labeled tokens as follows:
+
+\`\`\`plaintext
+Token: calculateSum, Label: CamelCaseIdentifier
+Token: Calculator, Label: UpperCamelCaseIdentifier
+\`\`\`
+
+## Explanation
+
+- The code snippet is analyzed using the defined regex patterns.
+- Each matching token is labeled according to its corresponding regex pattern.
+- For example, `calculateSum` is identified as a `CamelCaseIdentifier`, while `Calculator` is labeled as an `UpperCamelCaseIdentifier`.
+
+## Extending to Other Languages and Patterns
+
+You can extend this approach to other programming languages and add more patterns as needed, such as patterns for constants, specific language keywords, or even project-specific naming conventions.
+
+## Summary
+
+Using regex to label lexical patterns is a powerful way to categorize code tokens, especially for tasks like code analysis, refactoring, and documentation generation. By identifying and labeling these patterns, you can create a more structured understanding of the code's semantics.
