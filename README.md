@@ -46,8 +46,8 @@ To use this tool, ensure you have the following installed:
 ### Directory Structure
 
 ```
-├── cluster_labeling_tool.py     # Main script file
-├── 451-500.json                 # JSON file containing clusters data
+├── newGUI.py     # Main script file
+├── one.json                 # JSON file containing clusters data
 ├── codetest2_test_unique.label  # Label file
 └── README.md                    # This README file
 ```
@@ -67,7 +67,7 @@ You can adjust the following as needed:
 
 - **`1-50.json`**, **`51-100.json`**, **`101-150.json`**, **`151-200.json`**, **`201-250.json`**, **`251-300.json`**, **`301-350.json`**, **`351-400.json`**, **`401-450.json`**, **`451-500.json`**: These JSON files contain clusters of data, divided by the number ranges in their filenames. Each file stores the cluster information, including tokens, sentence contexts, and possibly user annotations. These files are used by the GUI tool for displaying and labeling clusters.
 
-- **`CodeConceptNet-v1.json`**: This JSON file is just a combined version of all the previous data files 1-500 (without LLM evaluatioin labels) 
+- **`CodeConceptNet-v1.json`**: This JSON file is just a combined version of all the previous data files 1-500 (without LLM generated labels) 
 
 - **`one.json`**: This JSON file is a combined version of all the previous data files 1-500 (with LLM evaluation labels) 
 
